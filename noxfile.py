@@ -72,7 +72,7 @@ def changelog(session: nox.Session) -> None:
         "--frozen",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
-    session.run("towncrier", "build", "--draft", "--version", "0.1.0")
+    session.run("towncrier", "build", "--draft")
 
 
 @nox.session
