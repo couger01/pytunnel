@@ -16,7 +16,6 @@ version = release
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
 ]
@@ -38,10 +37,6 @@ autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-}
 
 myst_enable_extensions = [
     "colon_fence",
