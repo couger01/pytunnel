@@ -10,6 +10,32 @@ permissions:
   contents: read
 
 jobs:
+  commit-hygiene:
+    name: Commit hygiene
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin "${{ github.base_ref }}"
+
+      - name: Check for fixup commits
+        run: |
+          base="$(git merge-base HEAD "origin/${{ github.base_ref }}")"
+          bad_commits="$(git log --format='%h %s' "${base}..HEAD" | grep -E '^[0-9a-f]+ (fixup|squash)!' || true)"
+
+          if [ -n "${bad_commits}" ]; then
+            echo "Found fixup or squash commits:"
+            echo "${bad_commits}"
+            echo
+            echo "Please squash or autosquash these commits before merging."
+            exit 1
+          fi
+
   tests:
     name: Tests (${{ matrix.python-version }})
     runs-on: ubuntu-latest

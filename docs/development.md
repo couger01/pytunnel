@@ -35,6 +35,17 @@ Public API docstrings use the numpydoc style. Use NumPy-style sections such as
 properties. The Sphinx configuration parses these docstrings with Napoleon's NumPy
 docstring support.
 
+## Git Commit Style
+
+Use Conventional Commits for commit messages. Keep the type lowercase, add an
+optional scope in parentheses, and write the summary in the imperative mood.
+
+```bash
+git commit -m "feat: add tunnel simulator"
+git commit -m "docs: update usage guide"
+git commit -m "chore(release): prepare changelog"
+```
+
 Preview changelog fragments:
 
 ```bash
