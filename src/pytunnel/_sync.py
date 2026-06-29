@@ -20,6 +20,20 @@ _BUFFER_SIZE = 65_536
 
 
 class SSHTunnel:
+    """Synchronous SSH local port forward.
+
+    ``SSHTunnel`` opens an SSH connection with Paramiko and forwards a local TCP port to
+    a remote host and port reachable from the SSH server.
+
+    Parameters
+    ----------
+    config
+        Tunnel connection settings.
+    client_factory
+        Optional factory used to create a Paramiko SSH client. This is primarily useful
+        for tests or callers that need to inject a preconfigured client implementation.
+    """
+
     def __init__(
         self,
         config: SSHTunnelConfig,
@@ -35,20 +49,56 @@ class SSHTunnel:
 
     @property
     def status(self) -> TunnelStatus:
+        """Current tunnel status.
+
+        Accessing this property checks whether an open tunnel still has an active SSH
+        transport and reports ``TunnelStatus.LOST_CONNECTION`` if the transport closed
+        unexpectedly.
+
+        Returns
+        -------
+        TunnelStatus
+            Current lifecycle state of the tunnel.
+        """
         if self._status is TunnelStatus.CONNECTED and not self._is_transport_active():
             self._status = TunnelStatus.LOST_CONNECTION
         return self._status
 
     @property
     def local_port(self) -> int:
+        """Local port bound by the tunnel.
+
+        Returns
+        -------
+        int
+            The configured local port before the tunnel is opened, or the actual bound
+            port after opening. This differs when ``config.local_port`` is ``0`` and the
+            operating system chooses an ephemeral port.
+        """
         if self._server is None:
             return self.config.local_port
         return int(self._server.server_address[1])
 
     def is_connected(self) -> bool:
+        """Return whether the tunnel is currently connected.
+
+        Returns
+        -------
+        bool
+            ``True`` when ``status`` is ``TunnelStatus.CONNECTED``.
+        """
         return self.status is TunnelStatus.CONNECTED
 
     def open(self) -> None:
+        """Open the SSH tunnel.
+
+        Raises
+        ------
+        TunnelAlreadyOpenError
+            If the tunnel is already connected.
+        TunnelConnectionError
+            If the SSH connection or local port forward cannot be established.
+        """
         if self.status is TunnelStatus.CONNECTED:
             msg = "tunnel is already open"
             raise TunnelAlreadyOpenError(msg)
@@ -99,6 +149,11 @@ class SSHTunnel:
             raise TunnelConnectionError(msg) from exc
 
     def close(self) -> None:
+        """Close the SSH tunnel.
+
+        The method is idempotent. Calling it on a disconnected tunnel leaves the tunnel
+        disconnected.
+        """
         if self._server is not None:
             self._server.shutdown()
             self._server.server_close()
