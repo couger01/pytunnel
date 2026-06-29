@@ -9,6 +9,18 @@
 .. autoclass:: pytunnel.AsyncSSHTunnel
    :members:
 
+.. autoclass:: pytunnel.Tunnel
+   :members:
+
+.. autoclass:: pytunnel.AsyncTunnel
+   :members:
+
+.. autoclass:: pytunnel.SimulatedSSHTunnel
+   :members:
+
+.. autoclass:: pytunnel.AsyncSimulatedSSHTunnel
+   :members:
+
 .. autoclass:: pytunnel.SSHTunnelConfig
    :members:
 
