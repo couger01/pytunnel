@@ -23,7 +23,7 @@ files = "^(src|tests|scripts|pyproject\\.toml)"
 [[repos.hooks]]
 id = "towncrier"
 name = "towncrier"
-entry = "uv run towncrier check --compare-with origin/main --staged"
+entry = "uv run python scripts/check_towncrier.py --compare-with origin/main --staged"
 language = "system"
 pass_filenames = false
 files = "^(newsfragments|pyproject\\.toml|CHANGELOG\\.md)"
