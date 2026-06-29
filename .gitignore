@@ -1,0 +1,7 @@
+.nox/
+.ruff_cache/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+docs/_build/
