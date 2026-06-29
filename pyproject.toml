@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytunnel"
-version = "0.1.0"
+version = "0.1.0.post1"
 description = "Sync and async Python APIs for controlling SSH tunnels."
 readme = "README.md"
 requires-python = ">=3.10"
