@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from types import TracebackType
 
 import asyncssh
-from typing_extensions import Self
 
+from pytunnel._base import AsyncTunnel
 from pytunnel._config import SSHTunnelConfig
 from pytunnel._exceptions import TunnelAlreadyOpenError, TunnelConnectionError
 from pytunnel._status import TunnelStatus
@@ -13,7 +12,7 @@ from pytunnel._status import TunnelStatus
 _ConnectFactory = Callable[..., Awaitable[asyncssh.SSHClientConnection]]
 
 
-class AsyncSSHTunnel:
+class AsyncSSHTunnel(AsyncTunnel):
     """Asynchronous SSH local port forward.
 
     ``AsyncSSHTunnel`` opens an SSH connection with AsyncSSH and forwards a local TCP
@@ -35,29 +34,15 @@ class AsyncSSHTunnel:
         *,
         connect_factory: _ConnectFactory | None = None,
     ) -> None:
-        self.config = config
+        super().__init__(config)
         self._connect_factory = connect_factory or asyncssh.connect
         self._connection: asyncssh.SSHClientConnection | None = None
         self._listener: asyncssh.SSHListener | None = None
-        self._status = TunnelStatus.DISCONNECTED
         self._local_port = config.local_port
 
-    @property
-    def status(self) -> TunnelStatus:
-        """Current tunnel status.
-
-        Accessing this property checks whether an open tunnel still has an active SSH
-        connection and reports ``TunnelStatus.LOST_CONNECTION`` if the connection closed
-        unexpectedly.
-
-        Returns
-        -------
-        TunnelStatus
-            Current lifecycle state of the tunnel.
-        """
+    def _refresh_status(self) -> None:
         if self._status is TunnelStatus.CONNECTED and not self._is_connection_active():
             self._status = TunnelStatus.LOST_CONNECTION
-        return self._status
 
     @property
     def local_port(self) -> int:
@@ -71,16 +56,6 @@ class AsyncSSHTunnel:
             operating system chooses an ephemeral port.
         """
         return self._local_port
-
-    def is_connected(self) -> bool:
-        """Return whether the tunnel is currently connected.
-
-        Returns
-        -------
-        bool
-            ``True`` when ``status`` is ``TunnelStatus.CONNECTED``.
-        """
-        return self.status is TunnelStatus.CONNECTED
 
     async def open(self) -> None:
         """Open the SSH tunnel.
@@ -144,18 +119,6 @@ class AsyncSSHTunnel:
             await self._connection.wait_closed()
             self._connection = None
         self._status = TunnelStatus.DISCONNECTED
-
-    async def __aenter__(self) -> Self:
-        await self.open()
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        await self.close()
 
     def _is_connection_active(self) -> bool:
         return self._connection is not None and not self._connection.is_closed()

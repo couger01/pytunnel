@@ -47,6 +47,26 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## Simulator API
+
+Use the simulator classes when tests or local development need the tunnel lifecycle
+without opening an SSH connection:
+
+```python
+from pytunnel import SSHAuthConfig, SSHTunnelConfig, SimulatedSSHTunnel
+
+config = SSHTunnelConfig(
+    ssh_host="bastion.example.com",
+    auth=SSHAuthConfig(username="alice", password="secret"),
+    remote_host="database.internal",
+    remote_port=5432,
+)
+
+with SimulatedSSHTunnel(config) as tunnel:
+    assert tunnel.is_connected()
+    print(tunnel.local_port)
+```
+
 ## Tunnel status
 
 `tunnel.status` returns a `TunnelStatus` value:
@@ -55,4 +75,3 @@ asyncio.run(main())
 - `TunnelStatus.CONNECTED`: the SSH connection is active.
 - `TunnelStatus.LOST_CONNECTION`: the tunnel was open, but the underlying SSH connection
   closed unexpectedly.
-

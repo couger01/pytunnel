@@ -4,11 +4,10 @@ import select
 import socketserver
 import threading
 from collections.abc import Callable
-from types import TracebackType
 
 import paramiko
-from typing_extensions import Self
 
+from pytunnel._base import Tunnel
 from pytunnel._config import SSHTunnelConfig
 from pytunnel._exceptions import (
     TunnelAlreadyOpenError,
@@ -19,7 +18,7 @@ from pytunnel._status import TunnelStatus
 _BUFFER_SIZE = 65_536
 
 
-class SSHTunnel:
+class SSHTunnel(Tunnel):
     """Synchronous SSH local port forward.
 
     ``SSHTunnel`` opens an SSH connection with Paramiko and forwards a local TCP port to
@@ -40,29 +39,15 @@ class SSHTunnel:
         *,
         client_factory: Callable[[], paramiko.SSHClient] | None = None,
     ) -> None:
-        self.config = config
+        super().__init__(config)
         self._client_factory = client_factory or paramiko.SSHClient
         self._client: paramiko.SSHClient | None = None
         self._server: _ForwardServer | None = None
         self._thread: threading.Thread | None = None
-        self._status = TunnelStatus.DISCONNECTED
 
-    @property
-    def status(self) -> TunnelStatus:
-        """Current tunnel status.
-
-        Accessing this property checks whether an open tunnel still has an active SSH
-        transport and reports ``TunnelStatus.LOST_CONNECTION`` if the transport closed
-        unexpectedly.
-
-        Returns
-        -------
-        TunnelStatus
-            Current lifecycle state of the tunnel.
-        """
+    def _refresh_status(self) -> None:
         if self._status is TunnelStatus.CONNECTED and not self._is_transport_active():
             self._status = TunnelStatus.LOST_CONNECTION
-        return self._status
 
     @property
     def local_port(self) -> int:
@@ -78,16 +63,6 @@ class SSHTunnel:
         if self._server is None:
             return self.config.local_port
         return int(self._server.server_address[1])
-
-    def is_connected(self) -> bool:
-        """Return whether the tunnel is currently connected.
-
-        Returns
-        -------
-        bool
-            ``True`` when ``status`` is ``TunnelStatus.CONNECTED``.
-        """
-        return self.status is TunnelStatus.CONNECTED
 
     def open(self) -> None:
         """Open the SSH tunnel.
@@ -165,18 +140,6 @@ class SSHTunnel:
             self._client.close()
             self._client = None
         self._status = TunnelStatus.DISCONNECTED
-
-    def __enter__(self) -> Self:
-        self.open()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        self.close()
 
     def _is_transport_active(self) -> bool:
         if self._client is None:

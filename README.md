@@ -75,6 +75,26 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## Simulator Usage
+
+Use the simulator classes when tests or local development need the tunnel lifecycle
+without opening an SSH connection:
+
+```python
+from pytunnel import SSHAuthConfig, SSHTunnelConfig, SimulatedSSHTunnel
+
+config = SSHTunnelConfig(
+    ssh_host="bastion.example.com",
+    auth=SSHAuthConfig(username="alice", password="secret"),
+    remote_host="database.internal",
+    remote_port=5432,
+)
+
+with SimulatedSSHTunnel(config) as tunnel:
+    assert tunnel.is_connected()
+    print(tunnel.local_port)
+```
+
 ## Tunnel Status
 
 `tunnel.status` returns a `TunnelStatus` value:
