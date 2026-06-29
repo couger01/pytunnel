@@ -1,3 +1,5 @@
+"""Public API for pytunnel."""
+
 from pytunnel._async import AsyncSSHTunnel
 from pytunnel._config import SSHAuthConfig, SSHTunnelConfig
 from pytunnel._exceptions import (

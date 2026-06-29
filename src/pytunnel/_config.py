@@ -8,6 +8,26 @@ from pytunnel._exceptions import TunnelConfigurationError
 
 @dataclass(frozen=True, slots=True)
 class SSHAuthConfig:
+    """Authentication settings for an SSH tunnel.
+
+    Parameters
+    ----------
+    username
+        SSH username used to authenticate with the bastion host.
+    password
+        Optional SSH password. Either ``password`` or ``private_key_path`` must be set.
+    private_key_path
+        Optional path to a private key file used for public key authentication.
+    private_key_passphrase
+        Optional passphrase for the private key.
+
+    Raises
+    ------
+    TunnelConfigurationError
+        If ``username`` is empty, or if neither ``password`` nor ``private_key_path`` is
+        provided.
+    """
+
     username: str
     password: str | None = None
     private_key_path: Path | str | None = None
@@ -23,6 +43,14 @@ class SSHAuthConfig:
 
     @property
     def private_key_path_str(self) -> str | None:
+        """Return the private key path as a string.
+
+        Returns
+        -------
+        str or None
+            The configured private key path converted to ``str``, or ``None`` when no
+            private key path is configured.
+        """
         if self.private_key_path is None:
             return None
         return str(self.private_key_path)
@@ -30,6 +58,36 @@ class SSHAuthConfig:
 
 @dataclass(frozen=True, slots=True)
 class SSHTunnelConfig:
+    """Connection settings for an SSH local port forward.
+
+    Parameters
+    ----------
+    ssh_host
+        SSH bastion host to connect to.
+    auth
+        Authentication settings used for the SSH connection.
+    remote_host
+        Host reached from the SSH bastion after the tunnel is open.
+    remote_port
+        Port reached from the SSH bastion after the tunnel is open.
+    local_host
+        Local interface to bind. Defaults to ``"127.0.0.1"``.
+    local_port
+        Local port to bind. Use ``0`` to request an ephemeral port.
+    ssh_port
+        SSH port on ``ssh_host``. Defaults to ``22``.
+    connect_timeout
+        Optional timeout, in seconds, for opening the SSH connection.
+    known_hosts
+        Optional path to a known hosts file. When omitted, backend defaults are used.
+
+    Raises
+    ------
+    TunnelConfigurationError
+        If host fields are empty, ports are outside the valid range, or
+        ``connect_timeout`` is not positive.
+    """
+
     ssh_host: str
     auth: SSHAuthConfig
     remote_host: str
@@ -53,6 +111,14 @@ class SSHTunnelConfig:
 
     @property
     def known_hosts_str(self) -> str | None:
+        """Return the known hosts path as a string.
+
+        Returns
+        -------
+        str or None
+            The configured known hosts path converted to ``str``, or ``None`` when no
+            known hosts path is configured.
+        """
         if self.known_hosts is None:
             return None
         return str(self.known_hosts)

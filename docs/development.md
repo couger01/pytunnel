@@ -28,6 +28,13 @@ Build the documentation site:
 uv run nox -s docs
 ```
 
+## Documentation Style
+
+Public API docstrings use the numpydoc style. Use NumPy-style sections such as
+`Parameters`, `Returns`, and `Raises` for exported classes, functions, methods, and
+properties. The Sphinx configuration parses these docstrings with Napoleon's NumPy
+docstring support.
+
 Preview changelog fragments:
 
 ```bash
