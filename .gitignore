@@ -1,7 +1,9 @@
 .nox/
 .ruff_cache/
 .venv/
+.uv-cache/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 docs/_build/
+dist/

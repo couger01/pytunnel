@@ -59,7 +59,7 @@ def typecheck(session: nox.Session) -> None:
         "--frozen",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
     )
-    session.run("ty", "check", "src", "tests")
+    session.run("ty", "check", "src", "tests", "scripts")
 
 
 @nox.session

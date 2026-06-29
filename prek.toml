@@ -15,10 +15,10 @@ repo = "local"
 [[repos.hooks]]
 id = "ty"
 name = "ty"
-entry = "uv run ty check src tests"
+entry = "uv run ty check src tests scripts"
 language = "system"
 pass_filenames = false
-files = "^(src|tests|pyproject\\.toml)"
+files = "^(src|tests|scripts|pyproject\\.toml)"
 
 [[repos.hooks]]
 id = "towncrier"

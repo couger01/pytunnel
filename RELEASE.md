@@ -145,6 +145,11 @@ git push origin v<version>
 The tag name must match the released package version with a leading `v`, for example
 `v0.1.0`.
 
+Pushing a `v<version>` tag starts the release workflow. The workflow verifies that the
+tag version matches `uv version --short`, builds the package with `uv build`, extracts
+the matching Towncrier section from `CHANGELOG.md`, and creates a GitHub release with
+the built distributions attached.
+
 ## Post-release
 
 After tagging:
